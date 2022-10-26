@@ -1,0 +1,110 @@
+<h1>Sign-up</h1>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" data-testid="form">
+  <fieldset>
+    <legend>Account basics</legend>
+
+    <!-- ******************************************* -->
+    <div class="field-block">
+      <div class="field-and-label">
+        <p>
+          <label>
+            <span class="label-text">
+              Email
+              <span class="necessity-required" aria-hidden="true">required</span>
+            </span>
+            <input type="email" formControlName="email" aria-describedby="email-description" aria-required="true"
+              appErrorMessage="email-errors" autocomplete="email" data-testid="email" />
+          </label>
+        </p>
+      </div>
+      <div class="field-info">
+        <p class="field-description" id="email-description">
+          Example: brigitte.bryan@example.org
+        </p>
+        <app-control-errors controlName="email" id="email-errors">
+          <ng-template let-errors>
+            <ng-container *ngIf="errors.required"> Email must be given. </ng-container>
+            <ng-container *ngIf="errors.email"> Not a valid email address. </ng-container>
+            <ng-container *ngIf="errors.maxlength">
+              Email must have less then 100 characters.
+            </ng-container>
+            <ng-container *ngIf="errors.taken">
+              Email is already taken. Please choose another one.
+            </ng-container>
+          </ng-template>
+        </app-control-errors>
+      </div>
+    </div>
+
+    <!-- ******************************************* -->
+    <div class="field-block">
+      <p class="field-and-label">
+        <label>
+          <span class="label-text">
+            Password
+            <span class="necessity-required" aria-hidden="true">required</span>
+          </span>
+          <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password"
+            aria-describedby="password-description" aria-required="true" appErrorMessage="password-errors"
+            autocomplete="new-password" (input)="getPasswordStrength()" data-testid="password" />
+        </label>
+      </p>
+      <div class="field-info">
+        <div class="field-description" id="password-description">
+          <p>
+            <button type="button" (click)="showPassword = !showPassword" aria-controls="password"
+              data-testid="show-password">
+              {{ showPassword ? '🔒 Hide password' : '👁️ Show password' }}
+            </button>
+            <span class="visually-hidden" aria-live="polite">
+              Your password is
+              {{ showPassword ? 'shown' : 'hidden' }}
+            </span>
+          </p>
+          <div
+            *ngIf="passwordStrength$ | async as passwordStrength"
+            class="password-strength"
+          >
+            <p>
+              Strength:
+              <strong *ngIf="passwordStrength.score < 3" class="password-strength-weak">
+                Weak
+              </strong>
+              <span *ngIf="passwordStrength.score === 3" class="password-strength-fair">
+                Fair
+              </span>
+              <span *ngIf="passwordStrength.score > 3" class="password-strength-strong">
+                Strong
+              </span>
+            </p>
+            <p *ngIf="passwordStrength.warning">{{ passwordStrength.warning }}</p>
+            <p *ngFor="let suggestion of passwordStrength.suggestions">
+              {{ suggestion }}
+            </p>
+          </div>
+        </div>
+        <app-control-errors controlName="password" id="password-errors">
+          <ng-template let-errors>
+            <ng-container *ngIf="errors.required"> Password must be given. </ng-container>
+            <ng-container *ngIf="errors.weak"> Password is too weak. </ng-container>
+          </ng-template>
+        </app-control-errors>
+      </div>
+    </div>
+  </fieldset>
+
+  <p *ngIf="!form.valid">Please fill in the necessary fields above.</p>
+
+  <p *ngIf="submitProgress === 'success'" role="status" class="form-submit-success" data-testid="status">
+    <strong>Sign-up successful!</strong>
+  </p>
+  <p *ngIf="submitProgress === 'error'" role="status" class="error-text form-submit-error" data-testid="status">
+    <strong>Sign-up error</strong>
+  </p>
+
+  <p>
+    <button type="submit" [disabled]="!form.valid" data-testid="submit">
+      Sign up
+    </button>
+  </p>
+</form>

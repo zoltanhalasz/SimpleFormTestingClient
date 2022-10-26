@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  signupServiceUrl: 'https://angular-form-testing.herokuapp.com',
 };
