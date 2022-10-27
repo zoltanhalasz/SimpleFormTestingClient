@@ -6,7 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { ControlErrorsComponent } from '../control-errors/control-errors.component';
 import { ErrorMessageDirective } from '../error-message/error-message.directive';
-import { PasswordStrength, SignupService } from '../signup.service';
+import { PasswordStrength, SignupService } from '../services/signup.service';
 import { click, dispatchFakeEvent, expectText, findEl, setFieldValue } from '../spec-helpers/element.spec-helper';
 import { email, password, signupData } from '../spec-helpers/signup-data.spec-helper';
 import { SubmitFormComponent } from './submit-form.component';

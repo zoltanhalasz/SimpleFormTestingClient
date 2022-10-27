@@ -1,8 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
+@import "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css";
 @use 'sass:color';
 @use 'app/sass/variables' as v;
 @use 'app/sass/mixins' as m;
 @use 'app/sass/functions' as f;
+
 
 *,
 *::before,

@@ -1,4 +1,4 @@
-import { SignupData } from '../signup.service';
+import { SignupData } from '../services/signup.service';
 
 
 export const password = 'dog lazy the over jumps fox brown quick the';
