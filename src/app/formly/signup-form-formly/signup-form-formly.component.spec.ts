@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/compiler';
 import { DebugElement } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { AppModule } from 'src/app/app.module';
 
@@ -48,7 +48,7 @@ describe('SignupFormComponentFormly', () => {
       imports: [AppModule],
       declarations: [SignupFormFormlyComponent],
       providers: [{ provide: SignupService, useValue: signupService }],
-      schemas: [ NO_ERRORS_SCHEMA ]
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SignupFormFormlyComponent);
@@ -68,14 +68,12 @@ describe('SignupFormComponentFormly', () => {
     await setup();
 
     fillForm();
-     fixture.detectChanges();
-
+    fixture.detectChanges();
     expect(findEl(fixture, '#submitButton').properties['disabled']).toBe(true);
-
-
-    const localSignupData = {email: 'Zuzu@mail.com', password: '12345Zocika.'};
+    const localSignupData = { email: 'Zuzu@mail.com', password: '12345Zocika.' };
     setFieldValue(fixture, '#emailFormlyField', localSignupData.email);
     setFieldValue(fixture, '#passwordFormlyField', localSignupData.password);
+    tick(400);
     fixture.detectChanges();
 
     expect(findEl(fixture, '#submitButton').properties['disabled']).toBe(false);
@@ -88,15 +86,17 @@ describe('SignupFormComponentFormly', () => {
   it('does not submit an invalid form - email, wrong email format, missing password', fakeAsync(async () => {
     await setup();
 
-    let localSignupData = {email: '', password: '12345Zocika.'};
+    let localSignupData = { email: '', password: '12345Zocika.' };
     setFieldValue(fixture, '#emailFormlyField', localSignupData.email);
     setFieldValue(fixture, '#passwordFormlyField', localSignupData.password);
+    tick(400);
     fixture.detectChanges();
     expect(findEl(fixture, '#submitButton').properties['disabled']).toBe(true);
     findEl(fixture, 'form').triggerEventHandler('submit', {});
+
     expect(signupService.signup).toHaveBeenCalledTimes(0);
 
-    localSignupData = {email: 'zzozo.', password: '12345Zocika.'};
+    localSignupData = { email: 'zzozo.', password: '12345Zocika.' };
     setFieldValue(fixture, '#emailFormlyField', localSignupData.email);
     setFieldValue(fixture, '#passwordFormlyField', localSignupData.password);
     fixture.detectChanges();
@@ -106,7 +106,7 @@ describe('SignupFormComponentFormly', () => {
     findEl(fixture, 'form').triggerEventHandler('submit', {});
     expect(signupService.signup).toHaveBeenCalledTimes(0);
 
-    localSignupData = {email: 'zozo@email.com', password: ''};
+    localSignupData = { email: 'zozo@email.com', password: '' };
     setFieldValue(fixture, '#emailFormlyField', localSignupData.email);
     setFieldValue(fixture, '#passwordFormlyField', localSignupData.password);
     fixture.detectChanges();
@@ -115,8 +115,58 @@ describe('SignupFormComponentFormly', () => {
     validationMessage = findComponent(fixture, '.invalid-feedback').nativeElement.innerText;
     expect(validationMessage).toContain('Password is required');
     expect(signupService.signup).toHaveBeenCalledTimes(0);
-
+    discardPeriodicTasks()
   }));
+
+  it('does not submit an invalid form - existing email', fakeAsync(async () => {
+    await setup();
+
+    let localSignupData = { email: 'abcd@hyundai.com', password: '12345Zocika.' };
+    setFieldValue(fixture, '#emailFormlyField', localSignupData.email);
+    setFieldValue(fixture, '#passwordFormlyField', localSignupData.password);
+    tick(400);
+    fixture.detectChanges();
+    expect(findEl(fixture, '#submitButton').properties['disabled']).toBe(false);
+    findEl(fixture, 'form').triggerEventHandler('submit', {});
+
+    expect(signupService.signup).toHaveBeenCalledTimes(1);
+
+    localSignupData = { email: 'abcd@hyundai.com', password: '12345Zocika.' };
+    setFieldValue(fixture, '#emailFormlyField', localSignupData.email);
+    setFieldValue(fixture, '#passwordFormlyField', localSignupData.password);
+    signupService.isEmailTaken.and.returnValue(of(true));
+    tick(400);
+    fixture.detectChanges();
+    let validationMessage = findComponent(fixture, '.invalid-feedback').nativeElement.innerText;
+    expect(validationMessage).toContain('This email is already taken.');
+    expect(findEl(fixture, '#submitButton').properties['disabled']).toBe(true);
+    findEl(fixture, 'form').triggerEventHandler('submit', {});
+    expect(signupService.signup).toHaveBeenCalledTimes(1);
+
+    discardPeriodicTasks()
+  }));
+
+  it('does not submit an invalid form - weak password', fakeAsync(async () => {
+    await setup();
+
+    let localSignupData = { email: 'abcd@hyundai.com', password: '1234' };
+    setFieldValue(fixture, '#emailFormlyField', localSignupData.email);
+    setFieldValue(fixture, '#passwordFormlyField', localSignupData.password);
+    signupService.getPasswordStrength.and.returnValue(of(weakPassword));
+    tick(400);
+    fixture.detectChanges();
+    expect(findEl(fixture, '#submitButton').properties['disabled']).toBe(true);
+    findEl(fixture, 'form').triggerEventHandler('submit', {});
+
+    expect(signupService.signup).toHaveBeenCalledTimes(0);
+
+    discardPeriodicTasks()
+  }));
+
+
+
+
+
 
   it('does not submit an invalid form', fakeAsync(async () => {
     // await setup();

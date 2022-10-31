@@ -25,7 +25,7 @@ import { FormlyModule } from '@ngx-formly/core';
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule, HttpClientModule,
-    FormlyModule.forRoot(),
+    FormlyModule.forRoot(    ),
     FormlyBootstrapModule
   ],
   providers: [],
